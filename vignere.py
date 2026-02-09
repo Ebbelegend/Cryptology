@@ -79,26 +79,9 @@ def decrypt(ciphertext, key):
     return "".join(plaintext)
 
 
-def break_vigenere(ciphertext, expected_freq, max_key_len=16):
-    results = []
-
-    for key_len in range(1, max_key_len + 1):
-        key = ""
-        for i in range(key_len):
-            segment = ciphertext[i::key_len]
-            shift = break_caesar(segment, expected_freq)
-            key += int_to_char[shift]
-
-        plaintext = decrypt(ciphertext, key)
-        score = chi_squared(plaintext, expected_freq)
-
-        results.append((score, key, plaintext))
-
-    results.sort(key=lambda x: x[0])
-    return results
-
-def break_vigenere_fixed_length(ciphertext, expected_freq, key_len):
+def break_vigenere_for_length(ciphertext, expected_freq, key_len):
     key = ""
+
     for i in range(key_len):
         segment = ciphertext[i::key_len]
         shift = break_caesar(segment, expected_freq)
@@ -106,6 +89,8 @@ def break_vigenere_fixed_length(ciphertext, expected_freq, key_len):
 
     plaintext = decrypt(ciphertext, key)
     return key, plaintext
+
+
 
 
 if __name__ == "__main__":
@@ -118,19 +103,14 @@ if __name__ == "__main__":
 
     expected_freq = get_frequencies(reference_text)
 
-    print("=== Automatic candidates (top 5) ===")
-    results = break_vigenere(ciphertext, expected_freq)
+    for key_len in range(1, 17):
+        key, plaintext = break_vigenere_for_length(ciphertext, expected_freq, key_len)
 
-    for score, key, plaintext in results[:5]:
-        print("\nCandidate key:", key)
-        print("Score:", score)
+        print("\n==============================")
+        print("Trying key length:", key_len)
+        print("Key:", key)
         print("Plaintext preview:")
-        print(plaintext[:200])
+        print(plaintext[:300])
 
-    print("\n=== Forced key length = 6 ===")
-    key6, plaintext6 = break_vigenere_fixed_length(ciphertext, expected_freq, 6)
-    print("Key:", key6)
-    print("Plaintext:")
-    print(plaintext6)
 
 
